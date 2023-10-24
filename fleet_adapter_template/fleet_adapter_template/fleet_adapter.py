@@ -12,30 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import argparse
-import yaml
-import nudged
-import time
+import sys
 import threading
+import time
+from functools import partial
 
+import nudged
 import rclpy
 import rclpy.node
-from rclpy.parameter import Parameter
-
 import rmf_adapter as adpt
-import rmf_adapter.vehicletraits as traits
 import rmf_adapter.battery as battery
 import rmf_adapter.geometry as geometry
 import rmf_adapter.graph as graph
 import rmf_adapter.plan as plan
+import rmf_adapter.vehicletraits as traits
+import yaml
+from rclpy.parameter import Parameter
+from rmf_task_msgs.msg import TaskProfile
+from rmf_task_msgs.msg import TaskType
 
-from rmf_task_msgs.msg import TaskProfile, TaskType
-
-from functools import partial
-
-from .RobotCommandHandle import RobotCommandHandle
 from .RobotClientAPI import RobotAPI
+from .RobotCommandHandle import RobotCommandHandle
 
 # ------------------------------------------------------------------------------
 # Helper functions
@@ -91,7 +89,8 @@ def initialize_fleet(config_yaml, nav_graph_path, node, use_sim_time, server_uri
     adapter.start()
     time.sleep(1.0)
 
-    fleet_handle = adapter.add_fleet(fleet_name, vehicle_traits, nav_graph, server_uri)
+    fleet_handle = adapter.add_fleet(
+        fleet_name, vehicle_traits, nav_graph, server_uri)
 
     if not fleet_config['publish_fleet_state']:
         fleet_handle.fleet_state_publish_period(None)
@@ -283,7 +282,7 @@ def main(argv=sys.argv):
     parser.add_argument("-n", "--nav_graph", type=str, required=True,
                         help="Path to the nav_graph for this fleet adapter")
     parser.add_argument("-s", "--server_uri", type=str, required=False, default="",
-                    help="URI of the api server to transmit state and task information.")
+                        help="URI of the api server to transmit state and task information.")
     parser.add_argument("--use_sim_time", action="store_true",
                         help='Use sim time, default: false')
     args = parser.parse_args(args_without_ros[1:])
@@ -305,7 +304,7 @@ def main(argv=sys.argv):
         param = Parameter("use_sim_time", Parameter.Type.BOOL, True)
         node.set_parameters([param])
 
-     if args.server_uri == "":
+    if args.server_uri == "":
         server_uri = None
     else:
         server_uri = args.server_uri
